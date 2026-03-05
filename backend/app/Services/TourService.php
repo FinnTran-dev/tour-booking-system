@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Tour;
+use App\Models\TourDate;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+
+class TourService
+{
+    /**
+     * Get a paginated list of public tours, with optional search.
+     * Prevents N+1 by eager loading only ENABLED tour dates.
+     */
+    public function getPublicTours(int $perPage = 15, ?string $search = null): LengthAwarePaginator
+    {
+        return Tour::query()
+            ->where('status', Tour::STATUS_PUBLIC)
+            ->when($search, function (Builder $query, $search) {
+                // Search by tour name
+                $query->where('name', 'like', '%' . $search . '%');
+            })
+            // Eager load ONLY enabled tour dates to avoid N+1 and filter them
+            ->with(['tourDates' => function ($query) {
+                $query->where('status', TourDate::STATUS_ENABLED);
+            }])
+            ->paginate($perPage);
+    }
+
+    /**
+     * Create a new tour
+     */
+    public function createTour(array $data): Tour
+    {
+        // Force the status to Draft upon creation
+        $data['status'] = Tour::STATUS_DRAFT;
+
+        $tour = Tour::create($data);
+
+        // Auto-create tour dates if provided
+        if (!empty($data['dates'])) {
+            foreach ($data['dates'] as $date) {
+                $tour->tourDates()->create([
+                    'date' => $date,
+                    'status' => TourDate::STATUS_ENABLED,
+                ]);
+            }
+        }
+
+        return $tour->load('tourDates');
+    }
+
+    /**
+     * Update an existing tour
+     */
+    public function updateTour(Tour $tour, array $data): Tour
+    {
+        $tour->update($data);
+
+        // Synchronize tour dates if provided
+        if (isset($data['dates'])) {
+            // Very simple replacement strategy: disable old, insert new.
+            // Or a more robust logic would be to sync them.
+            // For now, let's just add new ones dynamically.
+            foreach ($data['dates'] as $date) {
+                $tour->tourDates()->updateOrCreate(
+                    ['date' => $date],
+                    ['status' => TourDate::STATUS_ENABLED]
+                );
+            }
+        }
+
+        return $tour->load('tourDates');
+    }
+}
