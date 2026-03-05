@@ -1,0 +1,75 @@
+name: TBS CI Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testing_db
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: dom, curl, libxml, mbstring, zip, pdo, pdo_mysql
+          tools: composer:v2
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Environment Creation
+        working-directory: ./backend
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+        env:
+          DB_CONNECTION: mysql
+          DB_DATABASE: testing_db
+          DB_USERNAME: root
+          DB_PASSWORD: root
+
+      - name: Run Migrations and Tests
+        working-directory: ./backend
+        run: |
+          php artisan migrate
+          php artisan test
+        env:
+          DB_CONNECTION: mysql
+          DB_DATABASE: testing_db
+          DB_USERNAME: root
+          DB_PASSWORD: root
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      # Normally we would run tests here if Vue Tests existed
+      # - name: Run Vue Tests
+      #   working-directory: ./frontend
+      #   run: npm run test:unit
