@@ -23,6 +23,15 @@
           <div class="form-error" v-if="validationErrors.name">{{ validationErrors.name[0] }}</div>
         </div>
 
+        <div class="form-group" v-if="isEdit">
+          <label class="form-label" for="status">Status</label>
+          <select id="status" class="form-control" v-model="form.status" required>
+            <option value="Draft">Draft</option>
+            <option value="Public">Public</option>
+          </select>
+          <div class="form-error" v-if="validationErrors.status">{{ validationErrors.status[0] }}</div>
+        </div>
+
         <div class="form-group">
           <label class="form-label" for="description">Description</label>
           <textarea 
@@ -42,9 +51,21 @@
           </p>
           
           <div class="dates-list">
-            <div v-for="(date, index) in form.dates" :key="index" class="date-row">
-              <input type="date" class="form-control" v-model="form.dates[index]" required />
-              <button type="button" class="btn btn-outline text-danger" @click="removeDate(index)">
+            <div v-for="(dateObj, index) in form.dates" :key="index" class="date-row">
+              <input 
+                type="date" 
+                class="form-control" 
+                v-model="dateObj.value" 
+                :min="dateObj.isOld ? undefined : todayDate"
+                :disabled="dateObj.isOld && dateObj.value < todayDate"
+                required 
+              />
+              <button 
+                type="button" 
+                class="btn btn-outline text-danger" 
+                @click="removeDate(index)"
+                v-if="!dateObj.isOld || dateObj.value >= todayDate"
+              >
                 Remove
               </button>
             </div>
@@ -85,6 +106,7 @@ export default {
       form: {
         name: '',
         description: '',
+        status: 'Draft',
         dates: [],
       },
     };
@@ -97,13 +119,17 @@ export default {
     isLoading: {
       get() { return this.loading; },
       set(val) {}
+    },
+    todayDate() {
+      const d = new Date();
+      return d.toISOString().split('T')[0];
     }
   },
   methods: {
     ...mapActions('tours', ['createTour', 'updateTour', 'fetchTour', 'clearCurrentTour']),
     
     addDate() {
-      this.form.dates.push('');
+      this.form.dates.push({ value: '', isOld: false });
     },
     removeDate(index) {
       this.form.dates.splice(index, 1);
@@ -112,12 +138,14 @@ export default {
       this.validationErrors = {};
       try {
         if (this.isEdit) {
-          // Prepare payload (removing empty dates)
-          const payload = { ...this.form, dates: this.form.dates.filter(d => !!d) };
+          // Prepare payload (removing empty dates and map values)
+          const validDates = this.form.dates.filter(d => !!d.value).map(d => d.value);
+          const payload = { ...this.form, dates: validDates };
           await this.updateTour({ id: this.$route.params.id, data: payload });
           this.$router.push('/tours');
         } else {
-          const payload = { ...this.form, dates: this.form.dates.filter(d => !!d) };
+          const validDates = this.form.dates.filter(d => !!d.value).map(d => d.value);
+          const payload = { ...this.form, dates: validDates };
           await this.createTour(payload);
           this.$router.push('/tours');
         }
@@ -133,9 +161,10 @@ export default {
         const tour = res.data.data;
         this.form.name = tour.name;
         this.form.description = tour.description;
+        this.form.status = tour.status;
         // Map existing dates strings for the form
         if (tour.tour_dates) {
-          this.form.dates = tour.tour_dates.map(d => d.date);
+          this.form.dates = tour.tour_dates.map(d => ({ value: d.date, isOld: true }));
         }
       } catch (e) {
         // Handled by interceptor theoretically

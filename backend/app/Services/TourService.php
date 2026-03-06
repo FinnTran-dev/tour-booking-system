@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\Tour;
 use App\Models\TourDate;
+use App\Jobs\PublishTourJob;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Carbon\Carbon;
 
 class TourService
 {
@@ -47,6 +49,12 @@ class TourService
                     'date' => $date,
                     'status' => TourDate::STATUS_ENABLED,
                 ]);
+
+                // Dispatch auto-publish job if the date is in the future
+                $parsedDate = Carbon::parse($date)->startOfDay();
+                if ($parsedDate->isFuture()) {
+                    PublishTourJob::dispatch($tour, Tour::STATUS_PUBLIC)->delay($parsedDate);
+                }
             }
         }
 
@@ -70,6 +78,12 @@ class TourService
                     ['date' => $date],
                     ['status' => TourDate::STATUS_ENABLED]
                 );
+
+                // Re-schedule Auto Publish job
+                $parsedDate = Carbon::parse($date)->startOfDay();
+                if ($parsedDate->isFuture()) {
+                    PublishTourJob::dispatch($tour, Tour::STATUS_PUBLIC)->delay($parsedDate);
+                }
             }
         }
 

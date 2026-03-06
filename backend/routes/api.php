@@ -14,6 +14,7 @@ Route::prefix('v1')->group(function () {
     // Tours
     Route::get('/tours', [TourController::class, 'index']);
     Route::post('/tours', [TourController::class, 'store']);
+    Route::get('/tours/{tour}', [TourController::class, 'show']);
     Route::put('/tours/{tour}', [TourController::class, 'update']);
     Route::patch('/tours/{tour}', [TourController::class, 'update']);
 

@@ -2,8 +2,8 @@
   <div class="tours-view">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Public Tours</h1>
-        <p class="text-muted">Browse and manage available tours in the system.</p>
+        <h1 class="page-title">Tours Dashboard</h1>
+        <p class="text-muted">Browse and manage available tours in the system. Use filters below.</p>
       </div>
       <div>
         <router-link to="/tours/create" class="btn btn-success flex-align-center">
@@ -22,6 +22,13 @@
           v-model="searchQuery"
           @input="onSearchInput"
         />
+      </div>
+      <div class="form-group" style="margin-bottom: 0; min-width: 150px;">
+        <select class="form-control" v-model="statusFilter" @change="loadPage(1)">
+          <option value="">All Statuses</option>
+          <option value="Public">Public</option>
+          <option value="Draft">Draft</option>
+        </select>
       </div>
     </div>
 
@@ -73,6 +80,7 @@ export default {
   data() {
     return {
       searchQuery: '',
+      statusFilter: '',
       searchTimeout: null,
     };
   },
@@ -94,10 +102,11 @@ export default {
     },
 
     loadPage(page = 1) {
-      this.fetchTours({
-        page: page,
-        search: this.searchQuery,
-      }).catch(() => {});
+      let params = { page: page };
+      if (this.searchQuery) params.search = this.searchQuery;
+      if (this.statusFilter) params.status = this.statusFilter;
+
+      this.fetchTours(params).catch(() => {});
     },
 
     goToPage(page) {

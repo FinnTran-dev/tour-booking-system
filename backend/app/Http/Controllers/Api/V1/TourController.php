@@ -48,6 +48,16 @@ class TourController extends Controller
     }
 
     /**
+     * Display the specified Tour.
+     */
+    public function show(Tour $tour): JsonResponse
+    {
+        return response()->json([
+            'data' => new TourResource($tour->load('tourDates'))
+        ]);
+    }
+
+    /**
      * Update the specified Tour.
      */
     public function update(UpdateTourRequest $request, Tour $tour): JsonResponse

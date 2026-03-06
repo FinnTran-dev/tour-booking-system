@@ -20,7 +20,7 @@ class UpdateTourRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'status' => ['sometimes', 'required', Rule::in([Tour::STATUS_DRAFT, Tour::STATUS_PUBLIC])],
             'dates' => ['nullable', 'array'],
-            'dates.*' => ['date'],
+            'dates.*' => ['date', 'after_or_equal:today'],
         ];
     }
 }
