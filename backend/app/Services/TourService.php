@@ -4,19 +4,23 @@ namespace App\Services;
 
 use App\Models\Tour;
 use App\Models\TourDate;
+use App\Jobs\PublishTourJob;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Carbon\Carbon;
 
 class TourService
 {
     /**
-     * Get a paginated list of public tours, with optional search.
+     * Get a paginated list of tours, with optional search and status filter.
      * Prevents N+1 by eager loading only ENABLED tour dates.
      */
-    public function getPublicTours(int $perPage = 15, ?string $search = null): LengthAwarePaginator
+    public function getTours(int $perPage = 15, ?string $search = null, ?string $status = null): LengthAwarePaginator
     {
         return Tour::query()
-            ->where('status', Tour::STATUS_PUBLIC)
+            ->when($status, function (Builder $query, $status) {
+                $query->where('status', $status);
+            })
             ->when($search, function (Builder $query, $search) {
                 // Search by tour name
                 $query->where('name', 'like', '%' . $search . '%');
@@ -45,6 +49,12 @@ class TourService
                     'date' => $date,
                     'status' => TourDate::STATUS_ENABLED,
                 ]);
+
+                // Dispatch auto-publish job if the date is in the future
+                $parsedDate = Carbon::parse($date)->startOfDay();
+                if ($parsedDate->isFuture()) {
+                    PublishTourJob::dispatch($tour, Tour::STATUS_PUBLIC)->delay($parsedDate);
+                }
             }
         }
 
@@ -68,6 +78,12 @@ class TourService
                     ['date' => $date],
                     ['status' => TourDate::STATUS_ENABLED]
                 );
+
+                // Re-schedule Auto Publish job
+                $parsedDate = Carbon::parse($date)->startOfDay();
+                if ($parsedDate->isFuture()) {
+                    PublishTourJob::dispatch($tour, Tour::STATUS_PUBLIC)->delay($parsedDate);
+                }
             }
         }
 

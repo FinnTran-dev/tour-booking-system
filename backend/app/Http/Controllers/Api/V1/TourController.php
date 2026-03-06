@@ -22,14 +22,15 @@ class TourController extends Controller
     }
 
     /**
-     * List paginated public tours with enabled dates.
+     * List paginated tours.
      */
     public function index(Request $request): AnonymousResourceCollection
     {
         $perPage = $request->input('per_page', 15);
         $search = $request->input('search');
+        $status = $request->input('status');
 
-        $tours = $this->tourService->getPublicTours($perPage, $search);
+        $tours = $this->tourService->getTours($perPage, $search, $status);
 
         return TourResource::collection($tours);
     }
@@ -44,6 +45,16 @@ class TourController extends Controller
         return response()->json([
             'data' => new TourResource($tour)
         ], 201);
+    }
+
+    /**
+     * Display the specified Tour.
+     */
+    public function show(Tour $tour): JsonResponse
+    {
+        return response()->json([
+            'data' => new TourResource($tour->load('tourDates'))
+        ]);
     }
 
     /**
