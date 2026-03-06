@@ -101,14 +101,13 @@
             </button>
         </div>
 
-        <!-- Submit -->
         <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; align-items: center;">
             <p v-if="form.passengers.length > 0" style="margin-right: auto;">
               <strong style="font-size: 1.25rem;">Est. Total: ${{ form.passengers.length * 100 }}.00</strong>
             </p>
             <router-link to="/tours" class="btn btn-outline">Cancel</router-link>
             <button type="submit" class="btn btn-primary" :disabled="isLoading">
-               {{ isLoading ? 'Processing...' : 'Confirm Booking (Atomically)' }}
+               {{ isLoading ? 'Processing...' : (isEdit ? 'Save Changes' : 'Confirm Booking') }}
             </button>
         </div>
       </form>
@@ -170,10 +169,9 @@ export default {
     },
     async loadToursList() {
       try {
-        const res = await tourService.list({ per_page: 50 });
+        const res = await tourService.list({ per_page: 50, status: 'all' });
         this.toursList = res.data.data;
-        
-        // Auto select tour if passed via URL query
+
         if (this.$route.query.tour_id) {
            this.form.tour_id = Number(this.$route.query.tour_id);
            this.fetchTourDetails();
@@ -183,13 +181,12 @@ export default {
       }
     },
     async fetchTourDetails() {
-       if(!this.form.tour_id) return;
+       if (!this.form.tour_id) return;
        try {
            const res = await tourService.get(this.form.tour_id);
            this.availableDates = res.data.data.tour_dates;
-           // Auto select first date if available
-           if(this.availableDates.length > 0 && !this.form.tour_date_id) {
-               this.form.tour_date_id = this.availableDates[0].id; // default to first available date
+           if (this.availableDates.length > 0 && !this.form.tour_date_id) {
+               this.form.tour_date_id = this.availableDates[0].id;
            }
        } catch (e) {
            console.error(e);
@@ -197,30 +194,25 @@ export default {
     },
     async loadExistingBooking() {
        try {
-           const res = await this.$store.dispatch('bookings/fetchBooking', this.$route.params.id);
+           await this.$store.dispatch('bookings/fetchBooking', this.$route.params.id);
            const booking = this.$store.state.bookings.currentBooking;
            if (!booking) return;
 
-           // Fill base fields
-           this.form.tour_id = booking.tour ? booking.tour.id : '';
-           this.form.tour_date_id = booking.tour_date ? booking.tour_date.id : '';
-           this.form.customer_name = booking.customer_name;
+           this.form.tour_id      = booking.tour?.id ?? '';
+           this.form.tour_date_id = booking.tour_date?.id ?? '';
+           this.form.customer_name  = booking.customer_name;
            this.form.customer_email = booking.customer_email;
-           this.form.status = booking.status || 'Submitted';
+           this.form.status = booking.status ?? 'Submitted';
 
-           // Load dates for the selected tour
-           if (this.form.tour_id) {
-               await this.fetchTourDetails();
-           }
+           if (this.form.tour_id) await this.fetchTourDetails();
 
-           // Fill passengers
-           if (booking.passengers && booking.passengers.length > 0) {
+           if (booking.passengers?.length) {
                this.form.passengers = booking.passengers.map(p => ({
-                   id: p.id,
-                   given_name: p.given_name,
-                   surname: p.surname,
-                   date_of_birth: p.date_of_birth || '',
-                   special_request: p.special_request || '',
+                   id:              p.id,
+                   given_name:      p.given_name,
+                   surname:         p.surname,
+                   date_of_birth:   p.date_of_birth ?? '',
+                   special_request: p.special_request ?? '',
                }));
            }
        } catch (e) {
@@ -231,15 +223,11 @@ export default {
        try {
            if (this.isEdit) {
                await this.updateBooking({ id: this.$route.params.id, data: this.form });
-               alert('Booking updated successfully!');
-               this.$router.push('/bookings');
            } else {
                await this.createBooking(this.form);
-               alert('Booking Confirmed Successfully! Invoice Generated.');
-               this.$router.push('/bookings');
            }
+           this.$router.push('/bookings');
        } catch (e) {
-           // Errors handled by vuex mapping
            window.scrollTo(0, 0);
        }
     }

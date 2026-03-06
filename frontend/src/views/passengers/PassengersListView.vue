@@ -60,7 +60,7 @@
       </div>
 
       <div v-else class="empty-state card">
-        <div style="font-size: 3rem;">👥</div>
+        <div class="empty-icon"><i class="fa-solid fa-users-slash"></i></div>
         <p>No passengers found.</p>
       </div>
 

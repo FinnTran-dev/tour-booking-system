@@ -2,27 +2,27 @@
   <div id="app">
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <h1>🌍 TourBook</h1>
+        <h1>TourBook</h1>
       </div>
       <nav class="sidebar-nav">
         <router-link to="/tours" class="nav-link">
-          <span class="nav-icon">📋</span>
+          <i class="fa-solid fa-map nav-icon"></i>
           <span>Tours</span>
         </router-link>
         <router-link to="/passengers" class="nav-link">
-          <span class="nav-icon">👥</span>
+          <i class="fa-solid fa-users nav-icon"></i>
           <span>Passengers</span>
         </router-link>
         <router-link to="/bookings" class="nav-link">
-          <span class="nav-icon">📂</span>
+          <i class="fa-solid fa-calendar-check nav-icon"></i>
           <span>Bookings</span>
         </router-link>
         <router-link to="/invoices" class="nav-link">
-          <span class="nav-icon">🧾</span>
+          <i class="fa-solid fa-file-invoice-dollar nav-icon"></i>
           <span>Invoices</span>
         </router-link>
         <router-link to="/bookings/new" class="nav-link">
-          <span class="nav-icon">➕</span>
+          <i class="fa-solid fa-plus nav-icon"></i>
           <span>New Booking</span>
         </router-link>
       </nav>
@@ -41,33 +41,33 @@ export default {
 
 <style>
 /* ============================================
-   Design System — CSS Custom Properties
+   Design System — CSS Custom Properties (Light Theme)
    ============================================ */
 :root {
-  /* Colors */
-  --color-primary: #6366f1;
-  --color-primary-hover: #4f46e5;
-  --color-primary-light: rgba(99, 102, 241, 0.1);
-  --color-success: #10b981;
-  --color-success-light: rgba(16, 185, 129, 0.1);
-  --color-warning: #f59e0b;
-  --color-warning-light: rgba(245, 158, 11, 0.1);
-  --color-danger: #ef4444;
-  --color-danger-light: rgba(239, 68, 68, 0.1);
-  --color-info: #3b82f6;
-  --color-info-light: rgba(59, 130, 246, 0.1);
+  /* Brand Colors */
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-primary-light: rgba(79, 70, 229, 0.08);
+  --color-success: #059669;
+  --color-success-light: rgba(5, 150, 105, 0.08);
+  --color-warning: #d97706;
+  --color-warning-light: rgba(217, 119, 6, 0.08);
+  --color-danger: #dc2626;
+  --color-danger-light: rgba(220, 38, 38, 0.08);
+  --color-info: #2563eb;
+  --color-info-light: rgba(37, 99, 235, 0.08);
 
-  /* Neutrals */
-  --color-bg: #0f172a;
-  --color-bg-secondary: #1e293b;
-  --color-bg-tertiary: #334155;
-  --color-surface: #1e293b;
-  --color-surface-hover: #334155;
-  --color-border: #334155;
-  --color-border-light: #475569;
-  --color-text: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
+  /* Light Neutrals */
+  --color-bg: #f5f6fa;
+  --color-bg-secondary: #eef0f7;
+  --color-bg-tertiary: #e2e5f0;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f0f1f9;
+  --color-border: #e2e8f0;
+  --color-border-light: #cbd5e1;
+  --color-text: #1e2440;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #94a3b8;
 
   /* Typography */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -96,11 +96,11 @@ export default {
   --radius-lg: 12px;
   --radius-xl: 16px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+  /* Shadows — softer for light theme */
+  --shadow-sm: 0 1px 3px rgba(30, 36, 64, 0.06), 0 1px 2px rgba(30, 36, 64, 0.04);
+  --shadow-md: 0 4px 12px rgba(30, 36, 64, 0.08), 0 2px 4px rgba(30, 36, 64, 0.05);
+  --shadow-lg: 0 10px 24px rgba(30, 36, 64, 0.1), 0 4px 8px rgba(30, 36, 64, 0.06);
+  --shadow-glow: 0 0 0 3px rgba(79, 70, 229, 0.12);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -160,6 +160,7 @@ a {
   left: 0;
   bottom: 0;
   z-index: 100;
+  box-shadow: var(--shadow-sm);
 }
 
 .sidebar-brand {
@@ -170,10 +171,7 @@ a {
 .sidebar-brand h1 {
   font-size: var(--font-size-xl);
   font-weight: 700;
-  background: linear-gradient(135deg, var(--color-primary), #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-primary);
 }
 
 .sidebar-nav {
@@ -206,7 +204,16 @@ a {
 }
 
 .nav-icon {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
+  width: 18px;
+  text-align: center;
+}
+
+/* Empty state icon */
+.empty-icon {
+  font-size: 3rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
 }
 
 .main-content {
@@ -256,7 +263,7 @@ a {
 }
 
 .btn-success:hover:not(:disabled) {
-  background: #059669;
+  background: #047857;
 }
 
 .btn-danger {
@@ -265,7 +272,7 @@ a {
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: #dc2626;
+  background: #b91c1c;
 }
 
 .btn-outline {
@@ -300,7 +307,7 @@ a {
 .form-control {
   width: 100%;
   padding: var(--space-3) var(--space-4);
-  background: var(--color-bg);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   color: var(--color-text);

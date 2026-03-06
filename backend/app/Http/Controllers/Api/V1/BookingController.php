@@ -13,23 +13,15 @@ use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    protected BookingService $bookingService;
+    public function __construct(protected BookingService $bookingService) {}
 
-    public function __construct(BookingService $bookingService)
-    {
-        $this->bookingService = $bookingService;
-    }
-
-    /**
-     * List all bookings with relations.
-     */
     public function index(Request $request): JsonResponse
     {
         $bookings = $this->bookingService->getBookings(
-            perPage: 20,
             search: $request->query('search'),
             status: $request->query('status'),
         );
+
         return response()->json([
             'data' => BookingResource::collection($bookings),
             'meta' => [
@@ -40,45 +32,28 @@ class BookingController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified Booking.
-     */
     public function show($id): JsonResponse
     {
-        $booking = $this->bookingService->getBooking($id);
         return response()->json([
-            'data' => new BookingResource($booking)
+            'data' => new BookingResource($this->bookingService->getBooking($id))
         ]);
     }
 
-    /**
-     * Create a new booking with transactional safeguards.
-     */
     public function store(StoreBookingRequest $request): JsonResponse
     {
         try {
             $booking = $this->bookingService->createBooking($request->validated());
-
-            return response()->json([
-                'data' => new BookingResource($booking)
-            ], 201);
+            return response()->json(['data' => new BookingResource($booking)], 201);
         } catch (BookingException $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 400);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
-    /**
-     * Update the specified Booking.
-     */
     public function update(Request $request, Booking $booking): JsonResponse
     {
         try {
-            $updated = $this->bookingService->updateBooking($booking, $request->all());
-            return response()->json([
-                'data' => new BookingResource($updated)
-            ]);
+            $booking = $this->bookingService->updateBooking($booking, $request->all());
+            return response()->json(['data' => new BookingResource($booking)]);
         } catch (BookingException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
