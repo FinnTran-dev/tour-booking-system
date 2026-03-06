@@ -17,7 +17,9 @@ class TourFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name'        => $this->faker->words(3, true),
+            'description' => $this->faker->paragraph(),
+            'status'      => \App\Models\Tour::STATUS_DRAFT,
         ];
     }
 }

@@ -27,6 +27,12 @@ const routes = [
         meta: { title: 'Edit Tour' },
     },
     {
+        path: '/invoices',
+        name: 'invoices.index',
+        component: () => import(/* webpackChunkName: "invoices" */ '@/views/invoices/InvoicesListView.vue'),
+        meta: { title: 'Invoices' },
+    },
+    {
         path: '/passengers',
         name: 'passengers.index',
         component: () => import(/* webpackChunkName: "passengers" */ '@/views/passengers/PassengersListView.vue'),

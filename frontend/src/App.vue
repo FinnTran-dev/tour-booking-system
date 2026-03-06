@@ -17,6 +17,10 @@
           <span class="nav-icon">📂</span>
           <span>Bookings</span>
         </router-link>
+        <router-link to="/invoices" class="nav-link">
+          <span class="nav-icon">🧾</span>
+          <span>Invoices</span>
+        </router-link>
         <router-link to="/bookings/new" class="nav-link">
           <span class="nav-icon">➕</span>
           <span>New Booking</span>

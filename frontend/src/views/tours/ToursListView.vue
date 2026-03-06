@@ -104,7 +104,8 @@ export default {
     loadPage(page = 1) {
       let params = { page: page };
       if (this.searchQuery) params.search = this.searchQuery;
-      if (this.statusFilter) params.status = this.statusFilter;
+      // Admin view: pass explicit status or 'all' to see Draft+Public
+      params.status = this.statusFilter || 'all';
 
       this.fetchTours(params).catch(() => {});
     },
