@@ -97,7 +97,7 @@ export default {
       this.fetchTours({
         page: page,
         search: this.searchQuery,
-      });
+      }).catch(() => {});
     },
 
     goToPage(page) {
