@@ -65,7 +65,7 @@
                     :disabled="inv.updating"
                     @click="markAs(inv, 'Paid')"
                   >
-                    ✓ Mark Paid
+                    <i class="fa-solid fa-check"></i> Mark Paid
                   </button>
                   <button
                     v-if="inv.status !== 'Cancelled'"
@@ -91,7 +91,7 @@
       </div>
 
       <div v-else class="empty-state card">
-        <div style="font-size: 3rem;">🧾</div>
+        <div class="empty-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
         <p>No invoices found.</p>
       </div>
 

@@ -20,10 +20,12 @@
     </div>
 
     <div class="tour-actions">
+      <!-- View Bookings -->
+      <router-link :to="`/tours/${tour.id}/bookings`" class="btn btn-outline btn-sm"><i class="fa-solid fa-list"></i> Bookings</router-link>
       <!-- Edit Tour Link -->
-      <router-link :to="`/tours/${tour.id}/edit`" class="btn btn-outline btn-sm">Edit Tour</router-link>
+      <router-link :to="`/tours/${tour.id}/edit`" class="btn btn-outline btn-sm"><i class="fa-solid fa-pen"></i> Edit</router-link>
       <!-- Book Tour Link: Pass context through query string -->
-      <router-link :to="{ path: '/bookings/new', query: { tour_id: tour.id }}" class="btn btn-primary btn-sm" :class="{ 'disabled': !tour.tour_dates || tour.tour_dates.length === 0 }">Book Now</router-link>
+      <router-link :to="{ path: '/bookings/new', query: { tour_id: tour.id }}" class="btn btn-primary btn-sm" :class="{ 'disabled': !tour.tour_dates || tour.tour_dates.length === 0 }"><i class="fa-solid fa-calendar-plus"></i> Book Now</router-link>
     </div>
   </div>
 </template>

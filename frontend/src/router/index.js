@@ -21,6 +21,12 @@ const routes = [
         meta: { title: 'Create Tour' },
     },
     {
+        path: '/tours/:id/bookings',
+        name: 'tours.bookings',
+        component: () => import(/* webpackChunkName: "tour-bookings" */ '@/views/tours/TourBookingsView.vue'),
+        meta: { title: 'Tour Bookings' },
+    },
+    {
         path: '/tours/:id/edit',
         name: 'tours.edit',
         component: () => import(/* webpackChunkName: "tours" */ '@/views/tours/TourFormView.vue'),
