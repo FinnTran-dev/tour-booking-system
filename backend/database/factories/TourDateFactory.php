@@ -17,7 +17,9 @@ class TourDateFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'tour_id' => \App\Models\Tour::factory(),
+            'date'    => $this->faker->dateTimeBetween('now', '+6 months')->format('Y-m-d'),
+            'status'  => \App\Models\TourDate::STATUS_ENABLED,
         ];
     }
 }

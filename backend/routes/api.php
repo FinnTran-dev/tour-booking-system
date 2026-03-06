@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\BookingController;
+use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\PassengerController;
 use App\Http\Controllers\Api\V1\TourController;
 use Illuminate\Support\Facades\Route;
@@ -29,4 +30,8 @@ Route::prefix('v1')->group(function () {
     // Passengers
     Route::get('/passengers', [PassengerController::class, 'index']);
     Route::get('/passengers/{passenger}', [PassengerController::class, 'show']);
+
+    // Invoices
+    Route::get('/invoices', [InvoiceController::class, 'index']);
+    Route::patch('/invoices/{invoice}', [InvoiceController::class, 'update']);
 });
