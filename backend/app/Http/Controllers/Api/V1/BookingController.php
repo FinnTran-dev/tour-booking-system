@@ -23,11 +23,20 @@ class BookingController extends Controller
     /**
      * List all bookings with relations.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $bookings = $this->bookingService->getBookings();
+        $bookings = $this->bookingService->getBookings(
+            perPage: 20,
+            search: $request->query('search'),
+            status: $request->query('status'),
+        );
         return response()->json([
-            'data' => BookingResource::collection($bookings)
+            'data' => BookingResource::collection($bookings),
+            'meta' => [
+                'current_page' => $bookings->currentPage(),
+                'last_page'    => $bookings->lastPage(),
+                'total'        => $bookings->total(),
+            ],
         ]);
     }
 

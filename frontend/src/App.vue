@@ -9,6 +9,10 @@
           <span class="nav-icon">📋</span>
           <span>Tours</span>
         </router-link>
+        <router-link to="/passengers" class="nav-link">
+          <span class="nav-icon">👥</span>
+          <span>Passengers</span>
+        </router-link>
         <router-link to="/bookings" class="nav-link">
           <span class="nav-icon">📂</span>
           <span>Bookings</span>

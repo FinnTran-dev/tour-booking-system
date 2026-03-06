@@ -10,6 +10,27 @@
       </router-link>
     </div>
 
+    <!-- Filters -->
+    <div class="toolbar card">
+      <div class="form-group" style="margin-bottom: 0; flex: 1;">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search by customer name or email..."
+          v-model="searchQuery"
+          @input="onSearchInput"
+        />
+      </div>
+      <div class="form-group" style="margin-bottom: 0; min-width: 160px;">
+        <select class="form-control" v-model="statusFilter" @change="loadPage(1)">
+          <option value="">All Statuses</option>
+          <option value="Submitted">Submitted</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+
     <AlertMessage :message="error" type="error" />
     <LoadingSpinner :loading="loading" />
 
@@ -101,6 +122,13 @@ import LoadingSpinner from '@/components/common/LoadingSpinner.vue';
 export default {
   name: 'BookingsListView',
   components: { AlertMessage, LoadingSpinner },
+  data() {
+    return {
+      searchQuery: '',
+      statusFilter: '',
+      searchTimeout: null,
+    };
+  },
   computed: {
     ...mapState('bookings', ['bookings', 'pagination', 'loading', 'error']),
   },
@@ -110,12 +138,22 @@ export default {
       if (!dateStr) return '—';
       return new Date(dateStr).toLocaleDateString('vi-VN');
     },
+    onSearchInput() {
+      clearTimeout(this.searchTimeout);
+      this.searchTimeout = setTimeout(() => this.loadPage(1), 500);
+    },
+    loadPage(page = 1) {
+      const params = { page };
+      if (this.searchQuery) params.search = this.searchQuery;
+      if (this.statusFilter) params.status = this.statusFilter;
+      this.fetchBookings(params);
+    },
     goToPage(page) {
-      this.fetchBookings({ page });
+      this.loadPage(page);
     }
   },
   created() {
-    this.fetchBookings();
+    this.loadPage(1);
   }
 };
 </script>
@@ -123,6 +161,13 @@ export default {
 <style scoped>
 .text-muted {
   color: var(--color-text-secondary);
+}
+
+.toolbar {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding: var(--space-4) var(--space-6);
 }
 
 .empty-state {

@@ -16,11 +16,16 @@ class BookingService
     /**
      * Get all bookings with related data.
      */
-    public function getBookings()
+    public function getBookings(int $perPage = 20, ?string $search = null, ?string $status = null)
     {
         return Booking::with(['tour', 'tourDate', 'passengers', 'invoice'])
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->when($search, fn($q) => $q->where(function ($q2) use ($search) {
+                $q2->where('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_email', 'like', "%{$search}%");
+            }))
             ->latest()
-            ->paginate(20);
+            ->paginate($perPage);
     }
 
     /**

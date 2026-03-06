@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\BookingController;
+use App\Http\Controllers\Api\V1\PassengerController;
 use App\Http\Controllers\Api\V1\TourController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,4 +25,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/bookings/{booking}', [BookingController::class, 'show']);
     Route::put('/bookings/{booking}', [BookingController::class, 'update']);
     Route::patch('/bookings/{booking}', [BookingController::class, 'update']);
+
+    // Passengers
+    Route::get('/passengers', [PassengerController::class, 'index']);
+    Route::get('/passengers/{passenger}', [PassengerController::class, 'show']);
 });
