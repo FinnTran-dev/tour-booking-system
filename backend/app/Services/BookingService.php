@@ -14,6 +14,24 @@ use Throwable;
 class BookingService
 {
     /**
+     * Get all bookings with related data.
+     */
+    public function getBookings()
+    {
+        return Booking::with(['tour', 'tourDate', 'passengers', 'invoice'])
+            ->latest()
+            ->paginate(20);
+    }
+
+    /**
+     * Get a single booking with all relations.
+     */
+    public function getBooking(int $id): Booking
+    {
+        return Booking::with(['tour', 'tourDate', 'passengers', 'invoice'])->findOrFail($id);
+    }
+
+    /**
      * Create a booking MUST be atomic, validated, and automatically create an unpaid invoice.
      * Prevents duplicate bookings per passenger and dirty states.
      *
@@ -103,9 +121,12 @@ class BookingService
     public function updateBooking(Booking $booking, array $data): Booking
     {
         return DB::transaction(function () use ($booking, $data) {
-            // Update base details
+            // Update base details including status
             $booking->update([
-                'tour_date_id' => $data['tour_date_id'] ?? $booking->tour_date_id,
+                'tour_date_id'   => $data['tour_date_id'] ?? $booking->tour_date_id,
+                'customer_name'  => $data['customer_name'] ?? $booking->customer_name,
+                'customer_email' => $data['customer_email'] ?? $booking->customer_email,
+                'status'         => $data['status'] ?? $booking->status,
             ]);
 
             // Sync passengers if provided

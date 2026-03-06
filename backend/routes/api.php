@@ -19,5 +19,9 @@ Route::prefix('v1')->group(function () {
     Route::patch('/tours/{tour}', [TourController::class, 'update']);
 
     // Bookings
+    Route::get('/bookings', [BookingController::class, 'index']);
     Route::post('/bookings', [BookingController::class, 'store']);
+    Route::get('/bookings/{booking}', [BookingController::class, 'show']);
+    Route::put('/bookings/{booking}', [BookingController::class, 'update']);
+    Route::patch('/bookings/{booking}', [BookingController::class, 'update']);
 });
