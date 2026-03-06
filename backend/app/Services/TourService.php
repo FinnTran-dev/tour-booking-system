@@ -12,15 +12,17 @@ use Carbon\Carbon;
 class TourService
 {
     /**
-     * Get a paginated list of tours, with optional search and status filter.
-     * Prevents N+1 by eager loading only ENABLED tour dates.
+     * Get a paginated list of tours.
+     * - Default: only Public tours (as required by spec for public-facing endpoint).
+     * - Admin can pass ?status=Draft to see drafts, or ?status=all for everything.
+     * - Prevents N+1 by eager loading only ENABLED tour dates.
      */
     public function getTours(int $perPage = 15, ?string $search = null, ?string $status = null): LengthAwarePaginator
     {
         return Tour::query()
-            ->when($status, function (Builder $query, $status) {
-                $query->where('status', $status);
-            })
+            ->when($status === 'all', fn($q) => $q) // No filter — show all (admin)
+            ->when($status && $status !== 'all', fn($q) => $q->where('status', $status))
+            ->when(!$status, fn($q) => $q->where('status', Tour::STATUS_PUBLIC)) // Default: Public only
             ->when($search, function (Builder $query, $search) {
                 // Search by tour name
                 $query->where('name', 'like', '%' . $search . '%');

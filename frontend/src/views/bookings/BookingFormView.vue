@@ -33,6 +33,16 @@
           <div class="form-error" v-if="validationErrors.tour_date_id">{{ validationErrors.tour_date_id[0] }}</div>
         </div>
 
+        <!-- Booking Status (Edit only) -->
+        <div class="form-group" v-if="isEdit">
+          <label class="form-label">Booking Status</label>
+          <select class="form-control" v-model="form.status">
+            <option value="Submitted">Submitted</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+
         <!-- Customer Lead Info -->
         <div style="display: flex; gap: 1rem; margin-top: 2rem;">
             <div class="form-group" style="flex: 1;">
@@ -124,6 +134,7 @@ export default {
         tour_date_id: '',
         customer_name: '',
         customer_email: '',
+        status: 'Submitted',
         passengers: [this.getEmptyPassenger()],
       },
     };
@@ -184,19 +195,52 @@ export default {
            console.error(e);
        }
     },
+    async loadExistingBooking() {
+       try {
+           const res = await this.$store.dispatch('bookings/fetchBooking', this.$route.params.id);
+           const booking = this.$store.state.bookings.currentBooking;
+           if (!booking) return;
+
+           // Fill base fields
+           this.form.tour_id = booking.tour ? booking.tour.id : '';
+           this.form.tour_date_id = booking.tour_date ? booking.tour_date.id : '';
+           this.form.customer_name = booking.customer_name;
+           this.form.customer_email = booking.customer_email;
+           this.form.status = booking.status || 'Submitted';
+
+           // Load dates for the selected tour
+           if (this.form.tour_id) {
+               await this.fetchTourDetails();
+           }
+
+           // Fill passengers
+           if (booking.passengers && booking.passengers.length > 0) {
+               this.form.passengers = booking.passengers.map(p => ({
+                   id: p.id,
+                   given_name: p.given_name,
+                   surname: p.surname,
+                   date_of_birth: p.date_of_birth || '',
+                   special_request: p.special_request || '',
+               }));
+           }
+       } catch (e) {
+           console.error('Failed to load booking:', e);
+       }
+    },
     async submitForm() {
        try {
            if (this.isEdit) {
-               // Update omitted for brevity in UI, focus on Create first
                await this.updateBooking({ id: this.$route.params.id, data: this.form });
+               alert('Booking updated successfully!');
+               this.$router.push('/bookings');
            } else {
                await this.createBooking(this.form);
                alert('Booking Confirmed Successfully! Invoice Generated.');
-               this.$router.push('/tours');
+               this.$router.push('/bookings');
            }
        } catch (e) {
            // Errors handled by vuex mapping
-           window.scrollTo(0,0);
+           window.scrollTo(0, 0);
        }
     }
   },
@@ -205,7 +249,7 @@ export default {
      await this.loadToursList();
      
      if (this.isEdit) {
-         // Load existing
+       await this.loadExistingBooking();
      }
   }
 };

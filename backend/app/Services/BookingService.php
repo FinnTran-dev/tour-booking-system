@@ -14,6 +14,29 @@ use Throwable;
 class BookingService
 {
     /**
+     * Get all bookings with related data.
+     */
+    public function getBookings(int $perPage = 20, ?string $search = null, ?string $status = null)
+    {
+        return Booking::with(['tour', 'tourDate', 'passengers', 'invoice'])
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->when($search, fn($q) => $q->where(function ($q2) use ($search) {
+                $q2->where('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_email', 'like', "%{$search}%");
+            }))
+            ->latest()
+            ->paginate($perPage);
+    }
+
+    /**
+     * Get a single booking with all relations.
+     */
+    public function getBooking(int $id): Booking
+    {
+        return Booking::with(['tour', 'tourDate', 'passengers', 'invoice'])->findOrFail($id);
+    }
+
+    /**
      * Create a booking MUST be atomic, validated, and automatically create an unpaid invoice.
      * Prevents duplicate bookings per passenger and dirty states.
      *
@@ -103,9 +126,12 @@ class BookingService
     public function updateBooking(Booking $booking, array $data): Booking
     {
         return DB::transaction(function () use ($booking, $data) {
-            // Update base details
+            // Update base details including status
             $booking->update([
-                'tour_date_id' => $data['tour_date_id'] ?? $booking->tour_date_id,
+                'tour_date_id'   => $data['tour_date_id'] ?? $booking->tour_date_id,
+                'customer_name'  => $data['customer_name'] ?? $booking->customer_name,
+                'customer_email' => $data['customer_email'] ?? $booking->customer_email,
+                'status'         => $data['status'] ?? $booking->status,
             ]);
 
             // Sync passengers if provided

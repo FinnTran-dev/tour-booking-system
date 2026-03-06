@@ -27,6 +27,18 @@ const routes = [
         meta: { title: 'Edit Tour' },
     },
     {
+        path: '/passengers',
+        name: 'passengers.index',
+        component: () => import(/* webpackChunkName: "passengers" */ '@/views/passengers/PassengersListView.vue'),
+        meta: { title: 'Passengers' },
+    },
+    {
+        path: '/bookings',
+        name: 'bookings.index',
+        component: () => import(/* webpackChunkName: "bookings" */ '@/views/bookings/BookingsListView.vue'),
+        meta: { title: 'Bookings' },
+    },
+    {
         path: '/bookings/new',
         name: 'bookings.create',
         component: () => import(/* webpackChunkName: "bookings" */ '@/views/bookings/BookingFormView.vue'),

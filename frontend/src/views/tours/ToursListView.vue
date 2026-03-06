@@ -12,9 +12,9 @@
       </div>
     </div>
 
-    <!-- Toolbar: Search -->
+    <!-- Toolbar: Search + Status filter -->
     <div class="toolbar card">
-      <div class="form-group" style="margin-bottom: 0;">
+      <div class="form-group" style="margin-bottom: 0; flex: 1;">
         <input 
           type="text" 
           class="form-control" 
@@ -23,7 +23,7 @@
           @input="onSearchInput"
         />
       </div>
-      <div class="form-group" style="margin-bottom: 0; min-width: 150px;">
+      <div class="form-group" style="margin-bottom: 0; min-width: 160px;">
         <select class="form-control" v-model="statusFilter" @change="loadPage(1)">
           <option value="">All Statuses</option>
           <option value="Public">Public</option>
@@ -127,6 +127,7 @@ export default {
   padding: var(--space-4) var(--space-6);
   display: flex;
   gap: var(--space-4);
+  align-items: center;
 }
 
 .tour-grid {
