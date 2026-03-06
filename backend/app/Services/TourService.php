@@ -10,13 +10,15 @@ use Illuminate\Database\Eloquent\Builder;
 class TourService
 {
     /**
-     * Get a paginated list of public tours, with optional search.
+     * Get a paginated list of tours, with optional search and status filter.
      * Prevents N+1 by eager loading only ENABLED tour dates.
      */
-    public function getPublicTours(int $perPage = 15, ?string $search = null): LengthAwarePaginator
+    public function getTours(int $perPage = 15, ?string $search = null, ?string $status = null): LengthAwarePaginator
     {
         return Tour::query()
-            ->where('status', Tour::STATUS_PUBLIC)
+            ->when($status, function (Builder $query, $status) {
+                $query->where('status', $status);
+            })
             ->when($search, function (Builder $query, $search) {
                 // Search by tour name
                 $query->where('name', 'like', '%' . $search . '%');
