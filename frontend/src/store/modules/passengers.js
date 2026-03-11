@@ -67,6 +67,18 @@ const actions = {
             commit('SET_LOADING', false);
         }
     },
+    async deletePassenger({ commit }, id) {
+        commit('SET_LOADING', true);
+        commit('SET_ERROR', null);
+        try {
+            await passengerService.delete(id);
+        } catch (error) {
+            commit('SET_ERROR', error.apiMessage || 'Failed to delete passenger');
+            throw error;
+        } finally {
+            commit('SET_LOADING', false);
+        }
+    },
 };
 
 export default {

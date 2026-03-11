@@ -12,6 +12,7 @@ class TourDateResource extends JsonResource
         return [
             'id' => $this->id,
             'date' => $this->date->format('Y-m-d'),
+            'end_date' => $this->end_date ? $this->end_date->format('Y-m-d') : $this->date->format('Y-m-d'),
             'status' => $this->status,
         ];
     }

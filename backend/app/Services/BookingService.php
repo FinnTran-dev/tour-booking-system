@@ -102,11 +102,16 @@ class BookingService
             ]);
 
             if (isset($data['passengers'])) {
-                $pivotData = collect($data['passengers'])
-                    ->filter(fn($p) => isset($p['id']))
-                    ->keyBy('id')
-                    ->map(fn($p) => ['special_request' => $p['special_request'] ?? null])
-                    ->toArray();
+                $pivotData = [];
+                foreach ($data['passengers'] as $passengerData) {
+                    if (isset($passengerData['id'])) {
+                        $pivotData[$passengerData['id']] = ['special_request' => $passengerData['special_request'] ?? null];
+                        continue;
+                    }
+
+                    $passenger = Passenger::create(array_merge($passengerData, ['status' => Passenger::STATUS_ENABLED]));
+                    $pivotData[$passenger->id] = ['special_request' => $passengerData['special_request'] ?? null];
+                }
 
                 $booking->passengers()->sync($pivotData);
 

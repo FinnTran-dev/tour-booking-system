@@ -13,4 +13,7 @@ export default {
     update(id, data) {
         return apiClient.put(`/passengers/${id}`, data);
     },
+    delete(id) {
+        return apiClient.delete(`/passengers/${id}`);
+    },
 };

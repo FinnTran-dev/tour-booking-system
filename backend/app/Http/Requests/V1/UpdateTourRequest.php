@@ -20,7 +20,28 @@ class UpdateTourRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'status' => ['sometimes', 'required', Rule::in([Tour::STATUS_DRAFT, Tour::STATUS_PUBLIC])],
             'dates' => ['nullable', 'array'],
-            'dates.*' => ['date', 'after_or_equal:today'],
+            'dates.*.id' => ['nullable', 'integer', 'exists:tour_dates,id'],
+            'dates.*.date' => ['required', 'date'], // Removed after_or_equal:today
+            'dates.*.end_date' => ['required', 'date', 'after_or_equal:dates.*.date'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'name' => 'tour name',
+            'dates.*.date' => 'start date',
+            'dates.*.end_date' => 'end date',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'dates.*.date.required' => 'A tour date is required.',
+            'dates.*.date.after_or_equal' => 'The tour start date must be today or a future date.',
+            'dates.*.end_date.required' => 'The tour end date is required.',
+            'dates.*.end_date.after_or_equal' => 'The tour end date must be after or equal to the start date.',
         ];
     }
 }

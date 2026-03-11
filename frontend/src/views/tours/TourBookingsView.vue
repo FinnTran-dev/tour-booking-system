@@ -5,7 +5,6 @@
         <router-link to="/tours" class="back-link">← Back to Tours</router-link>
         <h1 class="page-title" v-if="tour">{{ tour.name }}</h1>
         <h1 class="page-title" v-else>Tour Bookings</h1>
-        <p class="text-muted">All bookings for this tour.</p>
       </div>
       <router-link
         v-if="tour"
@@ -55,7 +54,15 @@
                 <div>{{ booking.customer_name }}</div>
                 <div class="text-muted" style="font-size: 0.8rem;">{{ booking.customer_email }}</div>
               </td>
-              <td>{{ booking.tour_date ? booking.tour_date.date : '—' }}</td>
+              <td>
+                <div v-if="booking.tour_date">
+                  {{ booking.tour_date.date }}
+                  <span v-if="booking.tour_date.end_date && booking.tour_date.end_date !== booking.tour_date.date" class="text-muted" style="font-size: 0.8rem;">
+                    – {{ booking.tour_date.end_date }}
+                  </span>
+                </div>
+                <div v-else>—</div>
+              </td>
               <td>{{ booking.passengers ? booking.passengers.length : 0 }} pax</td>
               <td>
                 <span v-if="booking.invoice">

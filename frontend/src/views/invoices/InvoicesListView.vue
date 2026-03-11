@@ -3,7 +3,6 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">Invoices</h1>
-        <p class="text-muted">Manage payment status for all bookings.</p>
       </div>
     </div>
 
@@ -51,7 +50,7 @@
               </td>
               <td>{{ inv.booking && inv.booking.tour ? inv.booking.tour.name : '—' }}</td>
               <td>{{ inv.booking && inv.booking.tour_date ? inv.booking.tour_date.date : '—' }}</td>
-              <td><strong>${{ inv.amount }}</strong></td>
+              <td><strong>${{inv.amount}}</strong></td>
               <td>
                 <span :class="`badge badge-${inv.status.toLowerCase()}`">
                   {{ inv.status }}

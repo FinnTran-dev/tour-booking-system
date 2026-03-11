@@ -20,12 +20,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         \Illuminate\Support\Facades\DB::table('tour_dates')->insert([
-            ['id' => 1, 'tour_id' => 1, 'date' => '2026-04-10', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 2, 'tour_id' => 1, 'date' => '2026-04-15', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 3, 'tour_id' => 2, 'date' => '2026-05-01', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 4, 'tour_id' => 2, 'date' => '2026-05-10', 'status' => 'Disabled', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 5, 'tour_id' => 3, 'date' => '2026-06-20', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 6, 'tour_id' => 4, 'date' => '2023-01-01', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()], // Expired
+            ['id' => 1, 'tour_id' => 1, 'date' => '2026-04-10', 'end_date' => '2026-04-12', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 2, 'tour_id' => 1, 'date' => '2026-04-15', 'end_date' => '2026-04-17', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 3, 'tour_id' => 2, 'date' => '2026-05-01', 'end_date' => '2026-05-01', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 4, 'tour_id' => 2, 'date' => '2026-05-10', 'end_date' => '2026-05-12', 'status' => 'Disabled', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 5, 'tour_id' => 3, 'date' => '2026-06-20', 'end_date' => '2026-06-21', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 6, 'tour_id' => 4, 'date' => '2023-01-01', 'end_date' => '2023-01-01', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()], // Expired
         ]);
 
         \Illuminate\Support\Facades\DB::table('bookings')->insert([
@@ -36,6 +36,11 @@ class DatabaseSeeder extends Seeder
         \Illuminate\Support\Facades\DB::table('passengers')->insert([
             ['id' => 1, 'given_name' => 'John', 'surname' => 'Doe', 'email' => 'john@example.com', 'phone' => '123456789', 'date_of_birth' => '1990-01-01', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
             ['id' => 2, 'given_name' => 'Jane', 'surname' => 'Smith', 'email' => 'jane@example.com', 'phone' => '987654321', 'date_of_birth' => '1992-05-05', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 3, 'given_name' => 'Peter', 'surname' => 'Parker', 'email' => 'spiderman@example.com', 'phone' => '000111222', 'date_of_birth' => '2001-08-10', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 4, 'given_name' => 'Bruce', 'surname' => 'Wayne', 'email' => 'batman@example.com', 'phone' => '999888777', 'date_of_birth' => '1985-04-15', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 5, 'given_name' => 'Clark', 'surname' => 'Kent', 'email' => 'superman@example.com', 'phone' => '555444333', 'date_of_birth' => '1988-12-25', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 6, 'given_name' => 'Diana', 'surname' => 'Prince', 'email' => 'wonderwoman@example.com', 'phone' => '111222333', 'date_of_birth' => '1995-10-31', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 7, 'given_name' => 'Tony', 'surname' => 'Stark', 'email' => 'ironman@example.com', 'phone' => '444555666', 'date_of_birth' => '1980-05-29', 'status' => 'Enabled', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         \Illuminate\Support\Facades\DB::table('booking_passenger')->insert([

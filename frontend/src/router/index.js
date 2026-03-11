@@ -45,6 +45,18 @@ const routes = [
         meta: { title: 'Passengers' },
     },
     {
+        path: '/passengers/create',
+        name: 'passengers.create',
+        component: () => import(/* webpackChunkName: "passengers" */ '@/views/passengers/PassengerFormView.vue'),
+        meta: { title: 'Create Passenger' },
+    },
+    {
+        path: '/passengers/:id/edit',
+        name: 'passengers.edit',
+        component: () => import(/* webpackChunkName: "passengers" */ '@/views/passengers/PassengerFormView.vue'),
+        meta: { title: 'Edit Passenger' },
+    },
+    {
         path: '/bookings',
         name: 'bookings.index',
         component: () => import(/* webpackChunkName: "bookings" */ '@/views/bookings/BookingsListView.vue'),

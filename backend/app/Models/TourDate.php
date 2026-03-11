@@ -17,11 +17,13 @@ class TourDate extends Model
     protected $fillable = [
         'tour_id',
         'date',
+        'end_date',
         'status',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'end_date' => 'date',
     ];
 
     public function tour(): BelongsTo
