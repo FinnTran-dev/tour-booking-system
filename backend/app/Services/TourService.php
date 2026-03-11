@@ -53,6 +53,7 @@ class TourService
                 $tour->tourDates()->create([
                     'date' => $dateValue,
                     'end_date' => $endDateValue,
+                    'capacity' => $dateObj['capacity'] ?? 10,
                     'status' => TourDate::STATUS_ENABLED,
                 ]);
 
@@ -72,6 +73,16 @@ class TourService
      */
     public function updateTour(Tour $tour, array $data): Tour
     {
+        // Global check for stale data (Optimistic Locking)
+        if (isset($data['last_updated_at'])) {
+            $clientTimestamp = Carbon::parse($data['last_updated_at'])->toDateTimeString();
+            $dbTimestamp = $tour->updated_at->toDateTimeString();
+
+            if ($clientTimestamp !== $dbTimestamp) {
+                throw new \App\Exceptions\BookingException("This tour has been modified by another user. Please reload the page to get the latest data.");
+            }
+        }
+
         $tour->update($data);
 
         // Synchronize tour dates if provided
@@ -91,6 +102,7 @@ class TourService
                     [
                         'date' => $dateValue,
                         'end_date' => $endDateValue,
+                        'capacity' => $dateObj['capacity'] ?? 10,
                         'status' => TourDate::STATUS_ENABLED
                     ]
                 );

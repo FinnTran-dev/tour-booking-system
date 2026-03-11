@@ -5,7 +5,16 @@
     </div>
 
     <!-- Error/Loading states -->
-    <AlertMessage :message="error" type="error" />
+    <div v-if="isStale" class="alert alert-warning" style="display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--color-warning);">
+      <div style="display: flex; align-items: center; gap: var(--space-3);">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>{{ error }}</span>
+      </div>
+      <button @click="reloadPage" class="btn btn-sm btn-primary" style="background: var(--color-warning); border: none;">
+        <i class="fa-solid fa-rotate"></i> Reload Data
+      </button>
+    </div>
+    <AlertMessage v-else :message="error" type="error" />
     <LoadingSpinner :loading="isLoading" />
 
     <div class="card" v-if="!isLoading">
@@ -74,6 +83,20 @@
                     required 
                   />
                 </div>
+                <div class="input-group" style="max-width: 100px;">
+                  <label :for="'capacity-' + index">Capacity</label>
+                  <input 
+                    :id="'capacity-' + index"
+                    type="number" 
+                    class="form-control" 
+                    v-model.number="dateObj.capacity" 
+                    min="1"
+                    required 
+                  />
+                  <div v-if="dateObj.isOld" style="font-size: 10px; color: var(--color-text-muted); margin-top: 2px;">
+                    Booked: {{ dateObj.booked_count || 0 }}
+                  </div>
+                </div>
               </div>
               <button 
                 type="button" 
@@ -118,11 +141,13 @@ export default {
   data() {
     return {
       validationErrors: {},
+      isStale: false,
       form: {
         name: '',
         description: '',
         status: 'Draft',
         dates: [],
+        last_updated_at: null,
       },
     };
   },
@@ -144,7 +169,7 @@ export default {
     ...mapActions('tours', ['createTour', 'updateTour', 'fetchTour', 'clearCurrentTour']),
     
     addDate() {
-      this.form.dates.push({ date: '', end_date: '', isOld: false });
+      this.form.dates.push({ date: '', end_date: '', capacity: 10, isOld: false });
     },
     removeDate(index) {
       this.form.dates.splice(index, 1);
@@ -155,7 +180,12 @@ export default {
         // Prepare payload
         const validDates = this.form.dates
           .filter(d => !!d.date && !!d.end_date)
-          .map(d => ({ id: d.id, date: d.date, end_date: d.end_date }));
+          .map(d => ({ 
+             id: d.id, 
+             date: d.date, 
+             end_date: d.end_date,
+             capacity: d.capacity 
+          }));
         
         const payload = { ...this.form, dates: validDates };
 
@@ -167,7 +197,10 @@ export default {
           this.$router.push('/tours');
         }
       } catch (err) {
-        if (err.apiErrors) {
+        if (err.status === 409 || (err.apiMessage && err.apiMessage.includes('modified by another user'))) {
+          this.isStale = true;
+          this.$store.commit('tours/SET_ERROR', err.apiMessage);
+        } else if (err.apiErrors) {
           this.validationErrors = err.apiErrors;
         }
       }
@@ -179,12 +212,15 @@ export default {
         this.form.name = tour.name;
         this.form.description = tour.description;
         this.form.status = tour.status;
+        this.form.last_updated_at = tour.updated_at;
         // Map existing dates strings for the form
         if (tour.tour_dates) {
           this.form.dates = tour.tour_dates.map(d => ({ 
             id: d.id,
             date: d.date, 
             end_date: d.end_date || d.date, 
+            capacity: d.capacity,
+            booked_count: d.booked_count,
             isOld: true 
           }));
         }
@@ -192,6 +228,9 @@ export default {
         // Handled by interceptor theoretically
         console.error(e);
       }
+    },
+    reloadPage() {
+      window.location.reload();
     }
   },
   async mounted() {

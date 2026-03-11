@@ -18,6 +18,7 @@ class TourDate extends Model
         'tour_id',
         'date',
         'end_date',
+        'capacity',
         'status',
     ];
 

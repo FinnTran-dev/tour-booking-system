@@ -21,6 +21,7 @@ class StoreTourRequest extends FormRequest
             'dates' => ['nullable', 'array'],
             'dates.*.date' => ['required', 'date'],
             'dates.*.end_date' => ['required', 'date', 'after_or_equal:dates.*.date'],
+            'dates.*.capacity' => ['required', 'integer', 'min:1'],
         ];
     }
 
