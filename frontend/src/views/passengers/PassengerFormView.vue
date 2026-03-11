@@ -13,7 +13,7 @@
           <div class="form-group">
             <label class="form-label" for="given_name">Given Name *</label>
             <input type="text" id="given_name" class="form-control" v-model="form.given_name" required />
-            <div class="form-error" v-if="validationErrors.given_name">{{ validationErrors.given_name[0] }}</div>
+            <div class="form-error" v-if="validationErrors.given_name">{{ validationErrors.given_name[0] }}</div> 
           </div>
 
           <div class="form-group">
