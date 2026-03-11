@@ -13,7 +13,7 @@
       <strong>Available Dates:</strong>
       <div v-if="tour.tour_dates && tour.tour_dates.length > 0" class="date-tags">
         <span class="date-tag" v-for="date in tour.tour_dates" :key="date.id">
-          {{ date.date }}
+          {{ date.date }}<span v-if="date.end_date && date.end_date !== date.date"> – {{ date.end_date }}</span>
         </span>
       </div>
       <p class="text-muted" v-else>No dates available.</p>

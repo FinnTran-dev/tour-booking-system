@@ -28,4 +28,27 @@ class StoreBookingRequest extends FormRequest
             'passengers.*.special_request' => ['nullable', 'string'],
         ];
     }
+
+    public function attributes(): array
+    {
+        return [
+            'tour_id' => 'tour',
+            'tour_date_id' => 'tour date',
+            'customer_name' => 'contact name',
+            'customer_email' => 'contact email',
+            'passengers.*.given_name' => 'passenger given name',
+            'passengers.*.surname' => 'passenger surname',
+            'passengers.*.date_of_birth' => 'passenger date of birth',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'passengers.*.given_name.required_without' => 'Each passenger must have a given name.',
+            'passengers.*.surname.required_without' => 'Each passenger must have a surname.',
+            'passengers.*.date_of_birth.required_without' => 'Each passenger must have a date of birth.',
+            'passengers.*.date_of_birth.before' => 'Passenger date of birth must be in the past.',
+        ];
+    }
 }

@@ -30,7 +30,11 @@ Route::prefix('v1')->group(function () {
 
     // Passengers
     Route::get('/passengers', [PassengerController::class, 'index']);
+    Route::post('/passengers', [PassengerController::class, 'store']);
     Route::get('/passengers/{passenger}', [PassengerController::class, 'show']);
+    Route::put('/passengers/{passenger}', [PassengerController::class, 'update']);
+    Route::patch('/passengers/{passenger}', [PassengerController::class, 'update']);
+    Route::delete('/passengers/{passenger}', [PassengerController::class, 'destroy']);
 
     // Invoices
     Route::get('/invoices', [InvoiceController::class, 'index']);

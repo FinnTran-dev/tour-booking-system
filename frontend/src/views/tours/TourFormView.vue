@@ -52,19 +52,34 @@
           
           <div class="dates-list">
             <div v-for="(dateObj, index) in form.dates" :key="index" class="date-row">
-              <input 
-                type="date" 
-                class="form-control" 
-                v-model="dateObj.value" 
-                :min="dateObj.isOld ? undefined : todayDate"
-                :disabled="dateObj.isOld && dateObj.value < todayDate"
-                required 
-              />
+              <div class="date-inputs">
+                <div class="input-group">
+                  <label :for="'start-date-' + index">Start Date</label>
+                  <input 
+                    :id="'start-date-' + index"
+                    type="date" 
+                    class="form-control" 
+                    v-model="dateObj.date" 
+                    required 
+                  />
+                </div>
+                <div class="input-group">
+                  <label :for="'end-date-' + index">End Date</label>
+                  <input 
+                    :id="'end-date-' + index"
+                    type="date" 
+                    class="form-control" 
+                    v-model="dateObj.end_date" 
+                    :min="dateObj.date || todayDate"
+                    required 
+                  />
+                </div>
+              </div>
               <button 
                 type="button" 
                 class="btn btn-outline text-danger" 
                 @click="removeDate(index)"
-                v-if="!dateObj.isOld || dateObj.value >= todayDate"
+                v-if="!dateObj.isOld || dateObj.date >= todayDate"
               >
                 Remove
               </button>
@@ -129,7 +144,7 @@ export default {
     ...mapActions('tours', ['createTour', 'updateTour', 'fetchTour', 'clearCurrentTour']),
     
     addDate() {
-      this.form.dates.push({ value: '', isOld: false });
+      this.form.dates.push({ date: '', end_date: '', isOld: false });
     },
     removeDate(index) {
       this.form.dates.splice(index, 1);
@@ -137,15 +152,17 @@ export default {
     async submitForm() {
       this.validationErrors = {};
       try {
+        // Prepare payload
+        const validDates = this.form.dates
+          .filter(d => !!d.date && !!d.end_date)
+          .map(d => ({ id: d.id, date: d.date, end_date: d.end_date }));
+        
+        const payload = { ...this.form, dates: validDates };
+
         if (this.isEdit) {
-          // Prepare payload (removing empty dates and map values)
-          const validDates = this.form.dates.filter(d => !!d.value).map(d => d.value);
-          const payload = { ...this.form, dates: validDates };
           await this.updateTour({ id: this.$route.params.id, data: payload });
           this.$router.push('/tours');
         } else {
-          const validDates = this.form.dates.filter(d => !!d.value).map(d => d.value);
-          const payload = { ...this.form, dates: validDates };
           await this.createTour(payload);
           this.$router.push('/tours');
         }
@@ -164,7 +181,12 @@ export default {
         this.form.status = tour.status;
         // Map existing dates strings for the form
         if (tour.tour_dates) {
-          this.form.dates = tour.tour_dates.map(d => ({ value: d.date, isOld: true }));
+          this.form.dates = tour.tour_dates.map(d => ({ 
+            id: d.id,
+            date: d.date, 
+            end_date: d.end_date || d.date, 
+            isOld: true 
+          }));
         }
       } catch (e) {
         // Handled by interceptor theoretically
@@ -194,11 +216,34 @@ export default {
 
 .date-row {
   display: flex;
-  gap: var(--space-3);
-  align-items: center;
+  gap: var(--space-4);
+  align-items: flex-end;
+  background: var(--color-bg-secondary);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.date-inputs {
+  display: flex;
+  gap: var(--space-4);
+  flex: 1;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+.input-group label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
 }
 
 .date-row .form-control {
-  max-width: 250px;
+  width: 100%;
 }
 </style>

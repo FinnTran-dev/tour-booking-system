@@ -46,14 +46,18 @@ class TourService
 
         // Auto-create tour dates if provided
         if (!empty($data['dates'])) {
-            foreach ($data['dates'] as $date) {
+            foreach ($data['dates'] as $dateObj) {
+                $dateValue = is_array($dateObj) ? $dateObj['date'] : $dateObj;
+                $endDateValue = is_array($dateObj) ? ($dateObj['end_date'] ?? $dateValue) : $dateValue;
+
                 $tour->tourDates()->create([
-                    'date' => $date,
+                    'date' => $dateValue,
+                    'end_date' => $endDateValue,
                     'status' => TourDate::STATUS_ENABLED,
                 ]);
 
                 // Dispatch auto-publish job if the date is in the future
-                $parsedDate = Carbon::parse($date)->startOfDay();
+                $parsedDate = \Carbon\Carbon::parse($dateValue)->startOfDay();
                 if ($parsedDate->isFuture()) {
                     PublishTourJob::dispatch($tour, Tour::STATUS_PUBLIC)->delay($parsedDate);
                 }
@@ -72,17 +76,27 @@ class TourService
 
         // Synchronize tour dates if provided
         if (isset($data['dates'])) {
-            // Very simple replacement strategy: disable old, insert new.
-            // Or a more robust logic would be to sync them.
-            // For now, let's just add new ones dynamically.
-            foreach ($data['dates'] as $date) {
+            $incomingIds = collect($data['dates'])->pluck('id')->filter()->toArray();
+
+            // Optional: Delete dates that are not in the incoming list (Full Sync)
+            // $tour->tourDates()->whereNotIn('id', $incomingIds)->delete();
+
+            foreach ($data['dates'] as $dateObj) {
+                $id = $dateObj['id'] ?? null;
+                $dateValue = $dateObj['date'];
+                $endDateValue = $dateObj['end_date'] ?? $dateValue;
+
                 $tour->tourDates()->updateOrCreate(
-                    ['date' => $date],
-                    ['status' => TourDate::STATUS_ENABLED]
+                    ['id' => $id],
+                    [
+                        'date' => $dateValue,
+                        'end_date' => $endDateValue,
+                        'status' => TourDate::STATUS_ENABLED
+                    ]
                 );
 
                 // Re-schedule Auto Publish job
-                $parsedDate = Carbon::parse($date)->startOfDay();
+                $parsedDate = \Carbon\Carbon::parse($dateValue)->startOfDay();
                 if ($parsedDate->isFuture()) {
                     PublishTourJob::dispatch($tour, Tour::STATUS_PUBLIC)->delay($parsedDate);
                 }

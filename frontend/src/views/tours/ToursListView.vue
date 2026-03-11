@@ -2,8 +2,7 @@
   <div class="tours-view">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Tours Dashboard</h1>
-        <p class="text-muted">Browse and manage available tours in the system. Use filters below.</p>
+        <h1 class="page-title">Tours</h1>
       </div>
       <div>
         <router-link to="/tours/create" class="btn btn-success flex-align-center">

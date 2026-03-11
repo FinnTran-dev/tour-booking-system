@@ -3,7 +3,6 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">Bookings</h1>
-        <p class="text-muted">All confirmed and pending reservations.</p>
       </div>
       <router-link to="/bookings/new" class="btn btn-success">
         + New Booking
@@ -58,7 +57,15 @@
                 <div class="text-muted" style="font-size: 0.8rem;">{{ booking.customer_email }}</div>
               </td>
               <td>{{ booking.tour ? booking.tour.name : '—' }}</td>
-              <td>{{ booking.tour_date ? booking.tour_date.date : '—' }}</td>
+              <td>
+                <div v-if="booking.tour_date">
+                  {{ booking.tour_date.date }}
+                  <span v-if="booking.tour_date.end_date && booking.tour_date.end_date !== booking.tour_date.date" class="text-muted" style="font-size: 0.8rem;">
+                    – {{ booking.tour_date.end_date }}
+                  </span>
+                </div>
+                <div v-else>—</div>
+              </td>
               <td>{{ booking.passengers ? booking.passengers.length : 0 }} pax</td>
               <td>
                 <span v-if="booking.invoice">

@@ -3,7 +3,11 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">Passengers</h1>
-        <p class="text-muted">All registered passengers across bookings.</p>
+      </div>
+      <div>
+        <router-link to="/passengers/create" class="btn btn-success flex-align-center">
+          <span>+ Create New Passenger</span>
+        </router-link>
       </div>
     </div>
 
@@ -40,6 +44,7 @@
               <th>Phone</th>
               <th>Date of Birth</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -53,6 +58,10 @@
                 <span :class="`badge badge-${(p.status || 'enabled').toLowerCase()}`">
                   {{ p.status || 'Enabled' }}
                 </span>
+              </td>
+              <td class="table-actions">
+                <router-link :to="`/passengers/${p.id}/edit`" class="btn btn-outline btn-sm">Edit</router-link>
+                <button @click="deleteP(p.id)" class="btn btn-outline btn-sm text-danger">Delete</button>
               </td>
             </tr>
           </tbody>
@@ -121,6 +130,15 @@ export default {
         this.loading = false;
       }
     },
+    async deleteP(id) {
+      if (!confirm('Are you sure you want to delete this passenger?')) return;
+      try {
+        await passengerService.delete(id);
+        this.loadPage(this.pagination.current_page);
+      } catch (e) {
+        console.error(e);
+      }
+    },
   },
   created() {
     this.loadPage(1);
@@ -155,5 +173,10 @@ export default {
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   padding: 0 var(--space-4);
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 </style>
