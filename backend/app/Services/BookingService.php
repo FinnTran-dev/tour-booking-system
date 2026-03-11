@@ -53,6 +53,18 @@ class BookingService
             throw new BookingException('A booking must contain at least one passenger.');
         }
 
+        // Check Capacity
+        $requestedCount = count($data['passengers']);
+        $currentBookedCount = $tourDate->bookings()
+            ->whereIn('status', [Booking::STATUS_SUBMITTED, Booking::STATUS_CONFIRMED])
+            ->join('booking_passenger', 'bookings.id', '=', 'booking_passenger.booking_id')
+            ->count();
+
+        if ($currentBookedCount + $requestedCount > $tourDate->capacity) {
+            $available = $tourDate->capacity - $currentBookedCount;
+            throw new BookingException("Sorry, this tour date only has {$available} seats left.");
+        }
+
         try {
             return DB::transaction(function () use ($data) {
                 $booking = Booking::create([
@@ -94,6 +106,16 @@ class BookingService
     public function updateBooking(Booking $booking, array $data): Booking
     {
         return DB::transaction(function () use ($booking, $data) {
+            // Global check for stale data (Optimistic Locking)
+            if (isset($data['last_updated_at'])) {
+                $clientTimestamp = \Carbon\Carbon::parse($data['last_updated_at'])->toDateTimeString();
+                $dbTimestamp = $booking->updated_at->toDateTimeString();
+
+                if ($clientTimestamp !== $dbTimestamp) {
+                    throw new BookingException("This booking has been modified by another user. Please reload the page to get the latest data.");
+                }
+            }
+
             $booking->update([
                 'tour_date_id'   => $data['tour_date_id'] ?? $booking->tour_date_id,
                 'customer_name'  => $data['customer_name'] ?? $booking->customer_name,
@@ -102,6 +124,21 @@ class BookingService
             ]);
 
             if (isset($data['passengers'])) {
+                // Check Capacity during update
+                $requestedCount = count($data['passengers']);
+                $targetTourDate = isset($data['tour_date_id']) ? TourDate::findOrFail($data['tour_date_id']) : $booking->tourDate;
+
+                $currentBookedCount = $targetTourDate->bookings()
+                    ->whereIn('status', [Booking::STATUS_SUBMITTED, Booking::STATUS_CONFIRMED])
+                    ->where('bookings.id', '!=', $booking->id) // Exclude current booking
+                    ->join('booking_passenger', 'bookings.id', '=', 'booking_passenger.booking_id')
+                    ->count();
+
+                if ($currentBookedCount + $requestedCount > $targetTourDate->capacity) {
+                    $available = $targetTourDate->capacity - $currentBookedCount;
+                    throw new BookingException("Unable to update: this tour date only has {$available} seats left.");
+                }
+
                 $pivotData = [];
                 foreach ($data['passengers'] as $passengerData) {
                     if (isset($passengerData['id'])) {

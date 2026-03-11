@@ -4,7 +4,17 @@
       <h1 class="page-title">{{ isEdit ? 'Edit Booking' : 'New Booking' }}</h1>
     </div>
 
-    <AlertMessage :message="error" type="error" />
+    <!-- Error/Loading states -->
+    <div v-if="isStale" class="alert alert-warning" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6); border: 1px solid var(--color-warning);">
+      <div style="display: flex; align-items: center; gap: var(--space-3);">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>{{ error }}</span>
+      </div>
+      <button @click="reloadPage" class="btn btn-sm btn-primary" style="background: var(--color-warning); border: none;">
+        <i class="fa-solid fa-rotate"></i> Reload Data
+      </button>
+    </div>
+    <AlertMessage v-else :message="error" type="error" />
     <LoadingSpinner :loading="isLoading" />
 
     <div class="booking-layout" v-if="!isLoading">
@@ -31,12 +41,19 @@
                 <label class="form-label">Select Date *</label>
                 <select class="form-control" v-model="form.tour_date_id" required>
                    <option value="" disabled>-- Choose a Date --</option>
-                   <option v-for="d in availableDates" :key="d.id" :value="d.id">
-                     {{ d.date }} <span v-if="d.end_date && d.end_date !== d.date">(to {{ d.end_date }})</span>
-                   </option>
+                    <option v-for="d in availableDates" :key="d.id" :value="d.id" :disabled="d.booked_count >= d.capacity && !isEdit">
+                      {{ d.date }} 
+                      <span v-if="d.end_date && d.end_date !== d.date">(to {{ d.end_date }})</span>
+                      — {{ d.capacity - d.booked_count }} seats left
+                    </option>
                 </select>
                 <div class="form-error" v-if="validationErrors.tour_date_id">{{ validationErrors.tour_date_id[0] }}</div>
               </div>
+            </div>
+
+            <!-- Capacity Warning -->
+            <div v-if="isOverCapacity" class="alert alert-danger" style="margin-top: var(--space-4);">
+              <i class="fa-solid fa-triangle-exclamation"></i> This booking exceeds the available capacity for the selected date. Please reduce the number of passengers or choose another date.
             </div>
 
             <!-- Booking Status (Edit only) -->
@@ -147,7 +164,7 @@
               </div>
               <div class="footer-actions">
                 <router-link to="/bookings" class="btn btn-outline">Cancel</router-link>
-                <button type="submit" class="btn btn-primary btn-lg" :disabled="isLoading">
+                <button type="submit" class="btn btn-primary" :disabled="isLoading || isOverCapacity">
                    {{ isLoading ? 'Processing...' : (isEdit ? 'Save Changes' : 'Confirm Booking') }}
                 </button>
               </div>
@@ -214,6 +231,7 @@ export default {
       availableDates: [],
       existingPassengers: [],
       passengerSearch: '',
+      isStale: false,
       form: {
         tour_id: '',
         tour_date_id: '',
@@ -221,6 +239,7 @@ export default {
         customer_email: '',
         status: 'Submitted',
         passengers: [this.getEmptyPassenger()],
+        last_updated_at: null,
       },
     };
   },
@@ -240,6 +259,16 @@ export default {
         p.surname.toLowerCase().includes(query) ||
         (p.email && p.email.toLowerCase().includes(query))
       );
+    },
+    selectedDate() {
+      if (!this.form.tour_date_id) return null;
+      return this.availableDates.find(d => d.id === this.form.tour_date_id);
+    },
+    isOverCapacity() {
+      if (!this.selectedDate) return false;
+      const passengersCount = this.form.passengers.length;
+      const available = this.selectedDate.capacity - this.selectedDate.booked_count;
+      return !this.isEdit && passengersCount > available;
     }
   },
   methods: {
@@ -332,6 +361,7 @@ export default {
            this.form.customer_name  = booking.customer_name;
            this.form.customer_email = booking.customer_email;
            this.form.status = booking.status ?? 'Submitted';
+           this.form.last_updated_at = booking.updated_at;
 
            if (this.form.tour_id) await this.fetchTourDetails();
 
@@ -358,10 +388,19 @@ export default {
                await this.createBooking(this.form);
            }
            this.$router.push('/bookings');
-       } catch (e) {
-           window.scrollTo(0, 0);
-       }
-    }
+        } catch (err) {
+            if (err.status === 409 || (err.apiMessage && err.apiMessage.includes('modified by another user'))) {
+                this.isStale = true;
+                this.$store.commit('bookings/SET_ERROR', err.apiMessage);
+                window.scrollTo(0, 0);
+            } else {
+                window.scrollTo(0, 0);
+            }
+        }
+     },
+     reloadPage() {
+         window.location.reload();
+     }
   },
   async mounted() {
      this.clearCurrentBooking();

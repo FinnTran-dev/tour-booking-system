@@ -489,4 +489,38 @@ tr:hover td {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* Alerts */
+.alert {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border-left: 4px solid transparent;
+}
+
+.alert-error {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+  border-left-color: var(--color-danger);
+}
+
+.alert-warning {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+  border-left-color: var(--color-warning);
+}
+
+.alert-success {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+  border-left-color: var(--color-success);
+}
+
+.alert-info {
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+  border-left-color: var(--color-info);
+}
 </style>
