@@ -21,9 +21,10 @@ class UpdateTourRequest extends FormRequest
             'status' => ['sometimes', 'required', Rule::in([Tour::STATUS_DRAFT, Tour::STATUS_PUBLIC])],
             'dates' => ['nullable', 'array'],
             'dates.*.id' => ['nullable', 'integer', 'exists:tour_dates,id'],
-            'dates.*.date' => ['required', 'date', 'after_or_equal:today'],
+            'dates.*.date' => ['required', 'date'], // Relaxed to allow updating old tours with past dates
             'dates.*.end_date' => ['required', 'date', 'after_or_equal:dates.*.date'],
             'dates.*.capacity' => ['required', 'integer', 'min:1'],
+            'dates.*.status' => ['sometimes', 'required', Rule::in([\App\Models\TourDate::STATUS_ENABLED, \App\Models\TourDate::STATUS_DISABLED])],
             'last_updated_at' => ['sometimes', 'string'],
         ];
     }

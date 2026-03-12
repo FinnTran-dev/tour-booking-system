@@ -98,7 +98,17 @@
                     Booked: {{ dateObj.booked_count || 0 }}
                   </div>
                 </div>
+                <!-- Tour Date Status -->
+                <div class="input-group" style="max-width: 120px;">
+                  <label :for="'date-status-' + index">Status</label>
+                  <select :id="'date-status-' + index" class="form-control" v-model="dateObj.status" :class="{ 'is-invalid': validationErrors[`dates.${index}.date`] }">
+                    <option value="Enabled">Enabled</option>
+                    <option value="Disabled">Disabled</option>
+                  </select>
+                </div>
               </div>
+              <div class="form-error" v-if="validationErrors[`dates.${index}.date`]">{{ validationErrors[`dates.${index}.date`][0] }}</div>
+              <div class="form-error" v-if="validationErrors[`dates.${index}.end_date`]">{{ validationErrors[`dates.${index}.end_date`][0] }}</div>
               <button 
                 type="button" 
                 class="btn btn-outline text-danger" 
@@ -170,7 +180,7 @@ export default {
     ...mapActions('tours', ['createTour', 'updateTour', 'fetchTour', 'clearCurrentTour']),
     
     addDate() {
-      this.form.dates.push({ date: '', end_date: '', capacity: 10, isOld: false });
+      this.form.dates.push({ date: '', end_date: '', capacity: 10, status: 'Enabled', isOld: false });
     },
     removeDate(index) {
       this.form.dates.splice(index, 1);
@@ -185,7 +195,8 @@ export default {
              id: d.id, 
              date: d.date, 
              end_date: d.end_date,
-             capacity: d.capacity 
+             capacity: d.capacity,
+             status: d.status
           }));
         
         const payload = { ...this.form, dates: validDates };
@@ -222,6 +233,7 @@ export default {
             end_date: d.end_date || d.date, 
             capacity: d.capacity,
             booked_count: d.booked_count,
+            status: d.status || 'Enabled',
             isOld: true 
           }));
         }

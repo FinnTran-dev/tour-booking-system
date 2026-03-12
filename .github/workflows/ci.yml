@@ -47,8 +47,3 @@ jobs:
       - name: Install Dependencies
         working-directory: ./frontend
         run: npm ci
-
-      # Normally we would run tests here if Vue Tests existed
-      # - name: Run Vue Tests
-      #   working-directory: ./frontend
-      #   run: npm run test:unit
