@@ -41,7 +41,7 @@
                 <label class="form-label">Select Date *</label>
                 <select class="form-control" v-model="form.tour_date_id" required>
                    <option value="" disabled>-- Choose a Date --</option>
-                    <option v-for="d in availableDates" :key="d.id" :value="d.id" :disabled="d.booked_count >= d.capacity && !isEdit">
+                    <option v-for="d in filteredAvailableDates" :key="d.id" :value="d.id" :disabled="d.booked_count >= d.capacity && !isEdit">
                       {{ d.date }} 
                       <span v-if="d.end_date && d.end_date !== d.date">(to {{ d.end_date }})</span>
                       — {{ d.capacity - d.booked_count }} seats left
@@ -269,6 +269,16 @@ export default {
       const passengersCount = this.form.passengers.length;
       const available = this.selectedDate.capacity - this.selectedDate.booked_count;
       return !this.isEdit && passengersCount > available;
+    },
+    todayDate() {
+      const d = new Date();
+      return d.toISOString().split('T')[0];
+    },
+    filteredAvailableDates() {
+      // In Edit mode, show the selected date even if it is in the past
+      // In Create mode, only show future dates
+      if (this.isEdit) return this.availableDates;
+      return this.availableDates.filter(d => d.date >= this.todayDate);
     }
   },
   methods: {

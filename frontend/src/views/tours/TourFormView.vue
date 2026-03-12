@@ -69,6 +69,7 @@
                     type="date" 
                     class="form-control" 
                     v-model="dateObj.date" 
+                    :min="todayDate"
                     required 
                   />
                 </div>

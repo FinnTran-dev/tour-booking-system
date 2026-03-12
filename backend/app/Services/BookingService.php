@@ -49,6 +49,10 @@ class BookingService
             throw new BookingException('Cannot book an inactive tour date.');
         }
 
+        if ($tourDate->date->isPast() && !$tourDate->date->isToday()) {
+            throw new BookingException('Cannot book a tour date in the past.');
+        }
+
         if (empty($data['passengers'])) {
             throw new BookingException('A booking must contain at least one passenger.');
         }
