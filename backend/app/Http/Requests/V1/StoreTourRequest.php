@@ -19,7 +19,7 @@ class StoreTourRequest extends FormRequest
             'description' => ['nullable', 'string'],
             // The default status Draft is enforced via the service
             'dates' => ['nullable', 'array'],
-            'dates.*.date' => ['required', 'date'],
+            'dates.*.date' => ['required', 'date', 'after_or_equal:today'],
             'dates.*.end_date' => ['required', 'date', 'after_or_equal:dates.*.date'],
             'dates.*.capacity' => ['required', 'integer', 'min:1'],
         ];
