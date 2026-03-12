@@ -61,6 +61,23 @@ services:
     depends_on:
       - backend
 
+  # phpMyAdmin Service
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: tbs_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=${DB_USERNAME:-laravel_user}
+      - PMA_PASSWORD=${DB_PASSWORD:-root}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - tbs_network
+
 networks:
   tbs_network:
     driver: bridge
