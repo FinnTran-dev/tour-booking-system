@@ -22,6 +22,7 @@ class StoreTourRequest extends FormRequest
             'dates.*.date' => ['required', 'date', 'after_or_equal:today'],
             'dates.*.end_date' => ['required', 'date', 'after_or_equal:dates.*.date'],
             'dates.*.capacity' => ['required', 'integer', 'min:1'],
+            'dates.*.status' => ['sometimes', 'required', \Illuminate\Validation\Rule::in([\App\Models\TourDate::STATUS_ENABLED, \App\Models\TourDate::STATUS_DISABLED])],
         ];
     }
 

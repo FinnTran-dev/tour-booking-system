@@ -11,12 +11,6 @@ use Carbon\Carbon;
 
 class TourService
 {
-    /**
-     * Get a paginated list of tours.
-     * - Default: only Public tours (as required by spec for public-facing endpoint).
-     * - Admin can pass ?status=Draft to see drafts, or ?status=all for everything.
-     * - Prevents N+1 by eager loading only ENABLED tour dates.
-     */
     public function getTours(int $perPage = 15, ?string $search = null, ?string $status = null): LengthAwarePaginator
     {
         return Tour::query()
@@ -54,14 +48,8 @@ class TourService
                     'date' => $dateValue,
                     'end_date' => $endDateValue,
                     'capacity' => $dateObj['capacity'] ?? 10,
-                    'status' => TourDate::STATUS_ENABLED,
+                    'status' => $dateObj['status'] ?? TourDate::STATUS_ENABLED,
                 ]);
-
-                // Dispatch auto-publish job if the date is in the future
-                $parsedDate = \Carbon\Carbon::parse($dateValue)->startOfDay();
-                if ($parsedDate->isFuture()) {
-                    PublishTourJob::dispatch($tour, Tour::STATUS_PUBLIC)->delay($parsedDate);
-                }
             }
         }
 
@@ -89,9 +77,6 @@ class TourService
         if (isset($data['dates'])) {
             $incomingIds = collect($data['dates'])->pluck('id')->filter()->toArray();
 
-            // Optional: Delete dates that are not in the incoming list (Full Sync)
-            // $tour->tourDates()->whereNotIn('id', $incomingIds)->delete();
-
             foreach ($data['dates'] as $dateObj) {
                 $id = $dateObj['id'] ?? null;
                 $dateValue = $dateObj['date'];
@@ -103,15 +88,9 @@ class TourService
                         'date' => $dateValue,
                         'end_date' => $endDateValue,
                         'capacity' => $dateObj['capacity'] ?? 10,
-                        'status' => TourDate::STATUS_ENABLED
+                        'status' => $dateObj['status'] ?? TourDate::STATUS_ENABLED
                     ]
                 );
-
-                // Re-schedule Auto Publish job
-                $parsedDate = \Carbon\Carbon::parse($dateValue)->startOfDay();
-                if ($parsedDate->isFuture()) {
-                    PublishTourJob::dispatch($tour, Tour::STATUS_PUBLIC)->delay($parsedDate);
-                }
             }
         }
 
